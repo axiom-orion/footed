@@ -1,0 +1,71 @@
+import { verify } from "../engine/verify.ts";
+import { florida } from "../jurisdictions/us-fl.ts";
+import { affidavit, sources } from "../fixtures/fl-sample.ts";
+import { selfApplication } from "../fixtures/self-application.ts";
+import { renderReceiptBody } from "../receipt/render.ts";
+
+// The whole point: it runs on load. A busy reader clicks one URL and the check has
+// already run on the seeded sample. No upload step, no login, nothing persistent.
+export const dynamic = "force-dynamic";
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const { view } = await searchParams;
+  const isSelf = view === "self";
+
+  const html = isSelf
+    ? renderReceiptBody(selfApplication, {
+        title: "Application self-audit",
+        subtitle: "The same check, turned on the applicant",
+        unit: "filter",
+      })
+    : renderReceiptBody(verify(affidavit, sources, florida), {
+        title: "Financial Affidavit — Trust Receipt",
+        subtitle: florida.formId,
+        registryNote: florida.registryNote,
+        unit: "line",
+      });
+
+  const tab = (href: string, label: string, active: boolean) => (
+    <a
+      href={href}
+      style={{
+        font: "600 13px/1 system-ui,sans-serif",
+        textDecoration: "none",
+        padding: "8px 14px",
+        borderRadius: 999,
+        color: active ? "#2b2a27" : "#6f6a61",
+        background: active ? "#fffdfa" : "transparent",
+        border: active ? "1px solid #e7e1d6" : "1px solid transparent",
+      }}
+    >
+      {label}
+    </a>
+  );
+
+  return (
+    <>
+      <nav
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          display: "flex",
+          gap: 6,
+          justifyContent: "center",
+          padding: "10px",
+          background: "#f7f4efcc",
+          backdropFilter: "blur(6px)",
+          borderBottom: "1px solid #e7e1d6",
+        }}
+      >
+        {tab("/", "Affidavit", !isSelf)}
+        {tab("/?view=self", "Self-audit", isSelf)}
+      </nav>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+    </>
+  );
+}

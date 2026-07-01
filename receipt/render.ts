@@ -77,7 +77,8 @@ function lineRow(lv: LineVerdict): string {
   </div>`;
 }
 
-export function renderReceipt(result: DocumentVerdict, meta: ReceiptMeta): string {
+/** Returns just the receipt block (a self-contained div) for embedding in a page. */
+export function renderReceiptBody(result: DocumentVerdict, meta: ReceiptMeta): string {
   const unit = meta.unit ?? "line";
   const cleared = result.cleared;
   const bannerFg = result.counts.refused > 0 || result.blockers.length > 0 ? PALETTE.red : cleared ? PALETTE.green : PALETTE.amber;
@@ -103,10 +104,7 @@ export function renderReceipt(result: DocumentVerdict, meta: ReceiptMeta): strin
     )
     .join("");
 
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(meta.title)}</title></head>
-<body style="margin:0;background:${PALETTE.bg};color:${PALETTE.ink};font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+  return `<div style="min-height:100vh;background:${PALETTE.bg};color:${PALETTE.ink};font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
   <main style="max-width:760px;margin:0 auto;padding:40px 24px 64px">
     <div style="font:600 12px/1.4 ui-monospace,monospace;letter-spacing:.14em;color:${PALETTE.muted};text-transform:uppercase">Footed</div>
     <h1 style="font:700 26px/1.25 system-ui,sans-serif;margin:6px 0 2px">${esc(meta.title)}</h1>
@@ -129,5 +127,10 @@ export function renderReceipt(result: DocumentVerdict, meta: ReceiptMeta): strin
       <p style="margin:0;opacity:.8">Generated on demand · disposable · not stored.</p>
     </footer>
   </main>
-</body></html>`;
+</div>`;
+}
+
+/** Wraps the receipt block in a full, standalone HTML document (for the CLI / skill). */
+export function renderReceipt(result: DocumentVerdict, meta: ReceiptMeta): string {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(meta.title)}</title></head><body style="margin:0">${renderReceiptBody(result, meta)}</body></html>`;
 }

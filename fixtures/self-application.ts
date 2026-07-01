@@ -3,9 +3,9 @@
 // stunt). The whole point is that it refuses to green-check filter #3 — the one that
 // can't be independently proven — instead of quietly claiming it.
 //
-// Evidence links are placeholders to be filled with real diff/commit/deploy URLs at
-// submission time. Where a claim can't be backed, it stays UNVERIFIED. No refusals are
-// manufactured; honesty here is the argument.
+// Every VERIFIED line points at a real, publicly checkable artifact (all verified live).
+// Filter #3 stays UNVERIFIED because there is no paying-customer product in current role
+// to reconcile against — the tool refuses to bless what it can't prove, on its own author.
 
 import type { DocumentVerdict, LineVerdict } from "../engine/types.ts";
 
@@ -30,31 +30,31 @@ const lines: LineVerdict[] = [
     "f1_agents",
     "1. Agents write/test/deploy/fix/optimize 95%+ of your code",
     "verified",
-    "Reconciled to the build record of this very artifact: the engine, checks, jurisdiction module, renderer and tests were agent-authored and reviewed. Transcript + diffs attached [EVIDENCE: build-transcript URL].",
+    "Reconciled to this artifact's build: the engine, checks, jurisdiction module, renderer and tests were agent-authored and human-reviewed. The commit history (agent co-authored) is public and inspectable at github.com/axiom-orion/footed.",
   ),
   line(
     "f2_threads",
     "2. Manage 5+ agentic threads concurrently",
     "verified",
-    "Reconciled to a multi-agent run that fanned out research, ideation, adversarial critique and synthesis concurrently, then the build across parallel threads [EVIDENCE: workflow-transcript URL].",
+    "Reconciled to a 14-agent concept workflow (research → ideation → adversarial critique → synthesis) plus a parallel build across threads. A related public runtime that orchestrates multi-model consensus (Claude/Gemini/Grok): github.com/axiom-orion/governed-agents.",
   ),
   line(
     "f3_paying",
     "3. Ship production code for an app with paying customers in your current role",
     "unverified",
-    "Cannot be independently verified from the evidence provided. Adjacent, checkable facts exist (live deployments, a shipped multi-repo ecosystem, npm packages), but the strict 'paying customers, current role' criterion is not proven — so it is NOT stamped verified. This is the tool refusing to bless what it can't prove, applied to its own author.",
+    "Not stamped green: there is no paying-customer product in current role to independently verify. Checkable adjacent facts exist — live deployments (governed-agents.vercel.app, footed-eight.vercel.app, flcason.com) and open-source repos (github.com/axiom-orion: agent-memory-service, genealogy-graphrag, governed-agents) — but the strict 'paying customers, current role' criterion is unmet. This is the tool refusing to bless what it can't prove, applied to its own author.",
   ),
   line(
     "f4_nextjs",
     "4. Ship Next.js and care about UX",
     "verified",
-    "Reconciled to this deployed Next.js front door and its design system, tuned to the target product's visual language [EVIDENCE: deploy URL + repo].",
+    "Reconciled to live, deployed Next.js apps: footed-eight.vercel.app (this tool), governed-agents.vercel.app (a Next.js policy-gate runtime), and flcason.com. UX here is tuned to the target product's calm, warm visual language.",
   ),
   line(
     "f5_legalai",
     "5. Find the Legal AI industry interesting",
     "verified",
-    "Reconciled to the artifact itself: it targets Florida's Form 12.902(c), the highest-liability document in a dissolution, and audits rather than generates — a domain-correctness stance, not a demo.",
+    "Reconciled to this artifact — it targets Florida Form 12.902(c), the highest-liability document in a dissolution, and AUDITS rather than generates — plus a body of governance work (e.g. github.com/axiom-orion/governed-agents, a named-rule gate that evaluates tool-calls before execution).",
   ),
 ];
 

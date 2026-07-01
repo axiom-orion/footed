@@ -128,7 +128,7 @@ export const affidavit: Affidavit = {
     {
       id: "auth_support",
       section: "Authorities",
-      label: "Child support basis",
+      label: "Child support authority",
       kind: "authority",
       citation: "Fla. Stat. § 61.30",
     },
@@ -136,7 +136,7 @@ export const affidavit: Affidavit = {
       // DEFECT 3: a Connecticut statute in a Florida filing.
       id: "auth_alimony",
       section: "Authorities",
-      label: "Alimony basis",
+      label: "Alimony authority",
       kind: "authority",
       citation: "C.G.S. § 46b-84",
     },
@@ -144,7 +144,7 @@ export const affidavit: Affidavit = {
       // Real-looking ch.61 section we don't seed -> honest amber, needs human.
       id: "auth_relocation",
       section: "Authorities",
-      label: "Relocation basis",
+      label: "Relocation authority",
       kind: "authority",
       citation: "Fla. Stat. § 61.13001",
     },

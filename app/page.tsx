@@ -2,6 +2,7 @@ import { verify } from "../engine/verify.ts";
 import { florida } from "../jurisdictions/us-fl.ts";
 import { affidavit, sources } from "../fixtures/fl-sample.ts";
 import { selfApplication } from "../fixtures/self-application.ts";
+import { trackRecord } from "../fixtures/track-record.ts";
 import { renderReceiptBody } from "../receipt/render.ts";
 
 // The whole point: it runs on load. A busy reader clicks one URL and the check has
@@ -14,20 +15,27 @@ export default async function Page({
   searchParams: Promise<{ view?: string }>;
 }) {
   const { view } = await searchParams;
-  const isSelf = view === "self";
+  const v = view === "self" ? "self" : view === "track" ? "track" : "affidavit";
 
-  const html = isSelf
-    ? renderReceiptBody(selfApplication, {
-        title: "Application self-audit",
-        subtitle: "The same check, turned on the applicant",
-        unit: "filter",
-      })
-    : renderReceiptBody(verify(affidavit, sources, florida), {
-        title: "Financial Affidavit — Trust Receipt",
-        subtitle: florida.formId,
-        registryNote: florida.registryNote,
-        unit: "line",
-      });
+  const html =
+    v === "self"
+      ? renderReceiptBody(selfApplication, {
+          title: "Application self-audit",
+          subtitle: "The same check, turned on the applicant",
+          unit: "filter",
+        })
+      : v === "track"
+        ? renderReceiptBody(trackRecord, {
+            title: "Track record",
+            subtitle: "The same check, run on shipped work",
+            unit: "project",
+          })
+        : renderReceiptBody(verify(affidavit, sources, florida), {
+            title: "Financial Affidavit — Trust Receipt",
+            subtitle: florida.formId,
+            registryNote: florida.registryNote,
+            unit: "line",
+          });
 
   const tab = (href: string, label: string, active: boolean) => (
     <a
@@ -62,8 +70,9 @@ export default async function Page({
           borderBottom: "1px solid #e7e1d6",
         }}
       >
-        {tab("/", "Affidavit", !isSelf)}
-        {tab("/?view=self", "Self-audit", isSelf)}
+        {tab("/", "Affidavit", v === "affidavit")}
+        {tab("/?view=self", "Self-audit", v === "self")}
+        {tab("/?view=track", "Track record", v === "track")}
       </nav>
       <div dangerouslySetInnerHTML={{ __html: html }} />
     </>

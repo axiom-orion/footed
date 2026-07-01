@@ -8,6 +8,7 @@ import { verify } from "../engine/verify.ts";
 import { florida } from "../jurisdictions/us-fl.ts";
 import { affidavit, sources } from "../fixtures/fl-sample.ts";
 import { selfApplication } from "../fixtures/self-application.ts";
+import { trackRecord } from "../fixtures/track-record.ts";
 import { renderReceipt } from "./render.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -30,6 +31,14 @@ const selfHtml = renderReceipt(selfApplication, {
 });
 writeFileSync(join(outDir, "self-audit.html"), selfHtml);
 
-console.log(`affidavit.html  → ${affidavitResult.header} (${affidavitHtml.length} bytes)`);
-console.log(`self-audit.html → ${selfApplication.header} (${selfHtml.length} bytes)`);
+const trackHtml = renderReceipt(trackRecord, {
+  title: "Track record",
+  subtitle: "The same check, run on shipped work",
+  unit: "project",
+});
+writeFileSync(join(outDir, "track-record.html"), trackHtml);
+
+console.log(`affidavit.html    → ${affidavitResult.header} (${affidavitHtml.length} bytes)`);
+console.log(`self-audit.html   → ${selfApplication.header} (${selfHtml.length} bytes)`);
+console.log(`track-record.html → ${trackRecord.header} (${trackHtml.length} bytes)`);
 console.log(`out: ${outDir}`);

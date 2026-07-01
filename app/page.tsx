@@ -17,24 +17,33 @@ export default async function Page({
   const { view } = await searchParams;
   const v = view === "self" ? "self" : view === "track" ? "track" : "affidavit";
 
+  const contact = {
+    name: "Ryan Cason",
+    email: "ryan@vorion.org",
+    linkedin: "https://www.linkedin.com/in/ryan-cason-0b49103b7/",
+  };
+
   const html =
     v === "self"
       ? renderReceiptBody(selfApplication, {
           title: "Application self-audit",
           subtitle: "The same check, turned on the applicant",
           unit: "filter",
+          contact,
         })
       : v === "track"
         ? renderReceiptBody(trackRecord, {
             title: "Track record",
             subtitle: "The same check, run on shipped work",
             unit: "project",
+            contact,
           })
         : renderReceiptBody(verify(affidavit, sources, florida), {
             title: "Financial Affidavit — Trust Receipt",
             subtitle: florida.formId,
             registryNote: florida.registryNote,
             unit: "line",
+            legalBoundary: true,
           });
 
   const tab = (href: string, label: string, active: boolean) => (

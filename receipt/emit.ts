@@ -15,12 +15,19 @@ const here = dirname(fileURLToPath(import.meta.url));
 const outDir = join(here, "out");
 mkdirSync(outDir, { recursive: true });
 
+const contact = {
+  name: "Ryan Cason",
+  email: "ryan@vorion.org",
+  linkedin: "https://www.linkedin.com/in/ryan-cason-0b49103b7/",
+};
+
 const affidavitResult = verify(affidavit, sources, florida);
 const affidavitHtml = renderReceipt(affidavitResult, {
   title: "Financial Affidavit — Trust Receipt",
   subtitle: florida.formId,
   registryNote: florida.registryNote,
   unit: "line",
+  legalBoundary: true,
 });
 writeFileSync(join(outDir, "affidavit.html"), affidavitHtml);
 
@@ -28,6 +35,7 @@ const selfHtml = renderReceipt(selfApplication, {
   title: "Application self-audit",
   subtitle: "The same check, turned on the applicant",
   unit: "filter",
+  contact,
 });
 writeFileSync(join(outDir, "self-audit.html"), selfHtml);
 
@@ -35,6 +43,7 @@ const trackHtml = renderReceipt(trackRecord, {
   title: "Track record",
   subtitle: "The same check, run on shipped work",
   unit: "project",
+  contact,
 });
 writeFileSync(join(outDir, "track-record.html"), trackHtml);
 

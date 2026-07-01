@@ -14,6 +14,10 @@ interface ReceiptMeta {
   registryNote?: string;
   /** Word used for the unit under audit in the summary line, e.g. "line" or "filter". */
   unit?: string;
+  /** Show the "mechanical pre-filing check / not legal advice" footnote (affidavit only). */
+  legalBoundary?: boolean;
+  /** Optional "built by" line — used on the applicant-facing tabs, never the demo. */
+  contact?: { name: string; email: string; linkedin: string };
 }
 
 const PALETTE = {
@@ -122,8 +126,9 @@ export function renderReceiptBody(result: DocumentVerdict, meta: ReceiptMeta): s
 
     <footer style="margin-top:32px;padding-top:16px;border-top:1px solid ${PALETTE.line};font:400 12px/1.6 system-ui;color:${PALETTE.muted}">
       <p style="margin:0 0 8px"><strong>How to read this:</strong> a figure is <em>verified</em> only when it was independently reconstructed from a source you provided (shown above). <em>Unverified</em> means we could not confirm it — not that it is wrong. <em>Refused</em> means it contradicts its source, is impossible, or is a value asserted with no substantiation. One unresolved required item blocks clearance by design.</p>
-      <p style="margin:0 0 8px">This is a mechanical pre-filing check that flags items for a person to resolve. It does not give legal advice, reach conclusions, or rewrite the document — an attorney or the filer decides what to do with each flag.</p>
+      ${meta.legalBoundary ? `<p style="margin:0 0 8px">This is a mechanical pre-filing check that flags items for a person to resolve. It does not give legal advice, reach conclusions, or rewrite the document — an attorney or the filer decides what to do with each flag.</p>` : ""}
       ${meta.registryNote ? `<p style="margin:0 0 8px"><strong>Registry:</strong> ${esc(meta.registryNote)}</p>` : ""}
+      ${meta.contact ? `<p style="margin:0 0 8px">Built by ${esc(meta.contact.name)} · <a href="mailto:${esc(meta.contact.email)}" style="color:${PALETTE.ink}">${esc(meta.contact.email)}</a> · <a href="${esc(meta.contact.linkedin)}" style="color:${PALETTE.ink}">LinkedIn</a></p>` : ""}
       <p style="margin:0;opacity:.8">Generated on demand · disposable · not stored.</p>
     </footer>
   </main>

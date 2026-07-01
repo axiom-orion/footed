@@ -1,0 +1,8 @@
+node_modules/
+receipt/out/
+.next/
+out/
+dist/
+*.log
+.DS_Store
+.vercel

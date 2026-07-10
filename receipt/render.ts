@@ -66,15 +66,15 @@ function lineRow(lv: LineVerdict): string {
   const reasons = lv.checks
     .map(
       (c) =>
-        `<div style="font:400 13px/1.5 system-ui,sans-serif;color:${PALETTE.muted};margin-top:2px">${esc(c.reason)}</div>`,
+        `<div style="font:400 13px/1.5 system-ui,sans-serif;color:${PALETTE.muted};margin-top:2px;overflow-wrap:anywhere">${esc(c.reason)}</div>`,
     )
     .join("");
   const mand = lv.mandatory
     ? `<span style="font:600 10px/1.6 system-ui;color:${PALETTE.muted};text-transform:uppercase;letter-spacing:.05em"> · required</span>`
     : "";
   return `<div style="padding:12px 0;border-top:1px solid ${PALETTE.line}">
-    <div style="display:flex;gap:12px;align-items:baseline;justify-content:space-between">
-      <div style="font:600 14px/1.4 system-ui,sans-serif;color:${PALETTE.ink}">${esc(lv.label)}${mand}${sourceTag(lv)}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;justify-content:space-between">
+      <div style="font:600 14px/1.4 system-ui,sans-serif;color:${PALETTE.ink};overflow-wrap:anywhere">${esc(lv.label)}${mand}${sourceTag(lv)}</div>
       <div>${chip(lv.verdict)}</div>
     </div>
     ${reasons}

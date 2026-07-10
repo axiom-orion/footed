@@ -40,3 +40,7 @@ Every feature moves through the same pipeline, in order:
   silently to "verified".
 - Scope discipline: build what the PRD says. New ideas become future PRDs in `tasks/`,
   not drive-by commits.
+- Mobile-friendly is a standard, not a feature: every page and receipt must render
+  unbroken at 360px — no horizontal scroll, flex rows wrap, long unbroken strings
+  (hashes, URLs, citations) get `overflow-wrap:anywhere`. Most readers open this link
+  from a phone; a receipt that breaks on mobile is a failed receipt.

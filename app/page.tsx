@@ -71,6 +71,7 @@ export default async function Page({
           top: 0,
           zIndex: 10,
           display: "flex",
+          flexWrap: "wrap",
           gap: 6,
           justifyContent: "center",
           padding: "10px",

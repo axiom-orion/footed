@@ -105,6 +105,8 @@ verifier records these outputs instead:
   and `global_fetch_strictly_public`, assets from `.open-next/assets`, and the
   `WORKER_SELF_REFERENCE` service binding the adapter expects.
 - `open-next.config.ts` (new): `defineCloudflareConfig()` with defaults.
+- `.node-version` (new): `22`. Cloudflare's build image now defaults to Node 24, and the
+  prototype ran on Node 22.
 - `.gitignore`: add `.open-next/` and `.wrangler/`.
 - `next-env.d.ts`: Next 16.4 regenerates it on build, adding one import. Commit it as
   generated.
@@ -127,8 +129,8 @@ verifier records these outputs instead:
      `opennextjs-cloudflare preview`; `cf:deploy` → build, then
      `opennextjs-cloudflare deploy`.
    - Gates: typecheck, selftest, and `pnpm audit --audit-level high`.
-2. **Worker config.** Add `wrangler.jsonc` and `open-next.config.ts`, and ignore
-   `.open-next/` and `.wrangler/`. Prove criteria 5 and 6 locally.
+2. **Worker config.** Add `wrangler.jsonc`, `open-next.config.ts` and `.node-version`, and
+   ignore `.open-next/` and `.wrangler/`. Prove criteria 5 and 6 locally.
 3. **Retired-host check and citation fix.** This is one task and one commit, because the
    fixture scan stays red until the fixtures change, and CLAUDE.md allows no commit while a
    gate is red.
@@ -148,7 +150,8 @@ verifier records these outputs instead:
    - `pnpm cf:preview` runs it locally.
    - `pnpm cf:deploy` deploys (after `wrangler login`).
    - Or connect the repo in the Cloudflare dashboard with build command `pnpm cf:build` and
-     deploy command `pnpm exec opennextjs-cloudflare deploy`.
+     deploy command `pnpm exec opennextjs-cloudflare deploy`. On Windows this is the route
+     to use, or WSL: OpenNext doesn't guarantee native Windows builds.
 5. **Post-deploy.** This is blocked until a human runs the first deploy.
    - Run criterion 7 against the live URL.
    - Add the live link to README.

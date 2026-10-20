@@ -5,7 +5,8 @@ before starting work and what the librarian updates when a PRD ships.
 
 | #    | PRD | Status |
 | ---- | --- | ------ |
-| —    | *(next: 0001)* | — |
+| 0001 | [Deploy on Cloudflare Workers](0001-prd-cloudflare-deploy.md) | DRAFT |
+| —    | *(next: 0002)* | — |
 
 ## Convention
 

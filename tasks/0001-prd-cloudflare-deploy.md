@@ -1,0 +1,179 @@
+# 0001 — Deploy on Cloudflare Workers
+
+**Status:** DRAFT
+
+## Goal
+
+Footed's front door is a single link: the reader clicks it and the check has already run.
+That link is dead. `footed-eight.vercel.app` returns HTTP 402 because the Vercel account is
+blocked, and three receipt lines still cite Vercel hosts as live evidence, one of them under
+a VERIFIED verdict (`f4_nextjs`: "Reconciled to live, deployed Next.js apps"). A receipt
+that stamps green on a link that doesn't answer is the failure Footed exists to refuse.
+
+Serve the same app from Cloudflare Workers through the OpenNext adapter. Keep the
+per-request run (`force-dynamic` stays) and the same URLs (`/`, `/?view=self`,
+`/?view=track`). Stop the receipts from citing a retired host, so that every
+live-deployment citation names a host that answers.
+
+The move must not ship known holes either. Today's `next` 16.2.11 sits inside three
+critical Next.js advisories:
+- [GHSA-p293-qw3h-jr36](https://github.com/advisories/GHSA-p293-qw3h-jr36) and
+  [GHSA-2xp9-vwfh-vxw4](https://github.com/advisories/GHSA-2xp9-vwfh-vxw4), fixed in 16.3.3
+- [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j), fixed in 16.3.6
+
+There is also a high-severity SSRF,
+[GHSA-cjq9-62q9-8jv4](https://github.com/advisories/GHSA-cjq9-62q9-8jv4), fixed in 16.3.8.
+Dependabot's open bump to 16.3.3 (#2) leaves the last two open. The adapter's
+`>=16.4.1` floor closes all four, and the new deploy goes out with `pnpm audit` clean at
+high and above.
+
+## Non-goals
+
+- No change to the engine, the checks, the Florida module or any affidavit verdict. The 10
+  existing assertions prove it, unchanged.
+- No rendering or layout change. The 360px standard is untouched.
+- No caching or prerendering. The receipt keeps running on load, and caching it would
+  undercut the point of the page.
+- No CI workflow (a separate PRD), no custom domain, no analytics.
+- No hosting-plan decision. If the Free plan's CPU limit trips on the live Worker (error
+  1102, see Evidence), moving to Workers Paid is the owner's call, not a code change here.
+- Not governed-agents: its move is its own change (axiom-orion/governed-agents#39). Not
+  deleting the Vercel project either.
+- Other evidence drift is out of scope; this PRD retires only the Vercel hosts. Known
+  example for a later PRD: the track-record `cason-heritage` line cites
+  `github.com/axiom-orion/cason-heritage`, which doesn't answer anonymously.
+
+## Acceptance criteria
+
+**Proved by `pnpm selftest`:**
+
+1. **Planted defects still caught, honest middles intact.** All 10 existing assertions PASS
+   unchanged:
+   - `DEFECT 1: expense subtotal REFUSED (doesn't foot)`
+   - `DEFECT 2: retirement account REFUSED (no statement)`
+   - `DEFECT 3: Connecticut citation REFUSED (wrong state)`
+   - `HONEST AMBER: unseeded FL statute UNVERIFIED`
+   - `HONEST AMBER: blank mandatory field UNVERIFIED`
+   - `GREEN: wages reconcile to paystub`
+   - `GREEN: known FL statute verified`
+   - `GREEN: subtotal that foots is verified`
+   - `DOCUMENT: not cleared for filing`
+   - `DOCUMENT: exactly 3 refusals`
+2. **Negative case (fail-closed proof).** New assertion
+   `EVIDENCE: planted retired-host citation is caught`. A synthetic reason string citing
+   `footed-eight.vercel.app` must be flagged by the retired-host check. Like the planted
+   affidavit defects, this one must stay caught.
+3. New assertion `EVIDENCE: no receipt cites a retired host`. No string in the three
+   receipt fixtures (`fl-sample`, `self-application`, `track-record`) may contain a
+   `*.vercel.app` host, since the whole Vercel account is retired. On failure it prints the
+   offending `lineId`s. Run it red-first: against today's fixtures it FAILs on three lines
+   (`f3_paying`, `f4_nextjs`, `governed-agents`), and after task 3 it PASSes.
+
+**Proved by gate commands.** No selftest assertion can reach a build or a network, so the
+verifier records these outputs instead:
+
+4. `pnpm typecheck` reports zero errors, including after the Next 16.4 bump.
+5. `pnpm cf:build` builds the Worker, and `pnpm exec wrangler deploy --dry-run` validates it
+   without deploying. `pnpm audit --audit-level high` exits 0.
+6. Under `pnpm cf:preview` (local workerd), `/`, `/?view=self` and `/?view=track` each return
+   HTTP 200 with their own h1: "Financial Affidavit — Trust Receipt", "Application
+   self-audit" and "Track record".
+7. After the first deploy (a human step), each view on the live URL returns HTTP 200 on 20
+   consecutive requests, with no error 1102. Every URL that task 5 adds answers HTTP 200 on
+   the day it is committed.
+
+## Files
+
+- `package.json`:
+  - Add `@opennextjs/cloudflare` (dependency) and `wrangler` (devDependency).
+  - Bump `next` to `^16.4.1`. The adapter's peer range is `>=15.5.28 <16 || >=16.4.1`.
+  - Add scripts `cf:build`, `cf:preview` and `cf:deploy`. Use the `cf:` prefix, not a bare
+    `deploy`: `pnpm deploy` is a pnpm built-in and would not run the script.
+- `pnpm-lock.yaml`: regenerated by pnpm.
+- `pnpm-workspace.yaml`:
+  - Under `allowBuilds`, set `esbuild: true` and `workerd: true`. Without them pnpm skips
+    those install scripts, and `strict-dep-builds=false` in `.npmrc` makes the skip silent.
+  - Add two `overrides` that keep transitive highs out of the lockfile:
+    - `"@node-minify/core>glob": "^10.5.0"`. `@node-minify/core` pins glob at exactly
+      10.3.3, so only an override can lift it. That version is inside
+      [GHSA-5j98-mcp5-4vw2](https://github.com/advisories/GHSA-5j98-mcp5-4vw2), which
+      covers the glob CLI only and comes in through the adapter at build time.
+    - `"source-map-js": "^1.2.2"`, for
+      [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) via
+      next → postcss.
+- `wrangler.jsonc` (new): Worker `footed`, entry `.open-next/worker.js`, flags `nodejs_compat`
+  and `global_fetch_strictly_public`, assets from `.open-next/assets`, and the
+  `WORKER_SELF_REFERENCE` service binding the adapter expects.
+- `open-next.config.ts` (new): `defineCloudflareConfig()` with defaults.
+- `.node-version` (new): `22`. Cloudflare's build image now defaults to Node 24, and the
+  prototype ran on Node 22.
+- `.gitignore`: add `.open-next/` and `.wrangler/`.
+- `next-env.d.ts`: Next 16.4 regenerates it on build, adding one import. Commit it as
+  generated.
+- `engine/selftest.ts`: the two EVIDENCE assertions.
+- `fixtures/self-application.ts` and `fixtures/track-record.ts`: the three lines that cite
+  `*.vercel.app` hosts. The self-application header comment ("all verified live") must be
+  true again after the edit.
+- `README.md`: a "Deploy" section and, after task 5, the live link.
+
+`tsconfig.json` needs no change, because its `include` list is explicit and never reaches
+`.open-next/`.
+
+## Tasks
+
+1. **Dependencies.**
+   - With pnpm, add `@opennextjs/cloudflare@^1.20.12` and `wrangler@^4.151.3` (dev).
+   - Bump `next` to `^16.4.1`.
+   - Allow the `esbuild` and `workerd` builds, and add the two overrides.
+   - Add the scripts: `cf:build` → `opennextjs-cloudflare build`; `cf:preview` → build, then
+     `opennextjs-cloudflare preview`; `cf:deploy` → build, then
+     `opennextjs-cloudflare deploy`.
+   - Gates: typecheck, selftest, and `pnpm audit --audit-level high`.
+2. **Worker config.** Add `wrangler.jsonc`, `open-next.config.ts` and `.node-version`, and
+   ignore `.open-next/` and `.wrangler/`. Prove criteria 5 and 6 locally.
+3. **Retired-host check and citation fix.** This is one task and one commit, because the
+   fixture scan stays red until the fixtures change, and CLAUDE.md allows no commit while a
+   gate is red.
+   - Add both EVIDENCE assertions. Run them once before touching the fixtures and keep the
+     FAIL output for the verifier as the red-first proof.
+   - Then edit the three lines. The rule is to cite only what answers today:
+     - `f4_nextjs` (VERIFIED): "Reconciled to live, deployed Next.js apps: this tool (the
+       page you're reading) and flcason.com; the source of governed-agents, a Next.js
+       policy-gate runtime, is at github.com/axiom-orion/governed-agents. …" The UX
+       sentence stays.
+     - `f3_paying` (UNVERIFIED, verdict unchanged): the adjacent-facts list becomes "a live
+       deployment (flcason.com), this tool itself, and open-source repos (…)".
+     - track-record `governed-agents` (VERIFIED): "Open-source + live" becomes
+       "Open-source", and the dead host is dropped while the repo link stays.
+   - Run selftest again: 12/12 PASS.
+4. **README.** Add a "Deploy (Cloudflare Workers)" section:
+   - `pnpm cf:preview` runs it locally.
+   - `pnpm cf:deploy` deploys (after `wrangler login`).
+   - Or connect the repo in the Cloudflare dashboard with build command `pnpm cf:build` and
+     deploy command `pnpm exec opennextjs-cloudflare deploy`. On Windows this is the route
+     to use, or WSL: OpenNext doesn't guarantee native Windows builds.
+5. **Post-deploy.** This is blocked until a human runs the first deploy.
+   - Run criterion 7 against the live URL.
+   - Add the live link to README.
+   - If governed-agents' Worker answers by then, its track-record line may say "live" again
+     with that URL, but only after it returns HTTP 200.
+
+## Evidence (prototype, 2026-10-20)
+
+A scratch copy, not committed, with next 16.4.2, @opennextjs/cloudflare 1.20.12 and
+wrangler 4.151.3:
+
+- Typecheck is clean, selftest shows 10/10 PASS, and `opennextjs-cloudflare build` succeeds.
+- Under `wrangler dev` (workerd), `/`, `/?view=self` and `/?view=track` return HTTP 200 with
+  the three h1s in criterion 6.
+- `wrangler deploy --dry-run` reports a total upload of 4050.85 KiB (847.08 KiB gzip).
+- With the two overrides in place, `pnpm audit` reports "No known vulnerabilities found",
+  and the typecheck, selftest and Worker build still pass. Without the overrides, two highs
+  remain (glob and source-map-js). Today's `main` shows 3 critical, 7 high, 5 moderate and
+  1 low.
+- **CPU risk.** A warm server render measured about 20–25 ms of wall-clock time locally
+  (TTFB median 27–31 ms per view, against a 4–7 ms static-asset baseline). The Free plan
+  allows 10 ms of CPU per request. Cloudflare tolerates occasional overruns but ends
+  consistent ones with error 1102 ("Worker exceeded resource limits"). Wall-clock time on a
+  dev container is not edge CPU time, so this is a flag, not a verdict. Criterion 7 settles
+  it on the real platform.

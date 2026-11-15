@@ -47,7 +47,7 @@ const lines: LineVerdict[] = [
     "governed-agents",
     "governed-agents — named-rule policy gate",
     "verified",
-    "Open-source + live. A Next.js runtime that wraps LLM calls in a named-rule gate, evaluating every tool-call before execution and emitting an NDJSON audit trail; multi-model consensus + adversarial 'Red Cell' mode. This is the fail-closed gate Footed's verifier reuses. governed-agents.vercel.app · github.com/axiom-orion/governed-agents.",
+    "Open-source. A Next.js runtime that wraps LLM calls in a named-rule gate, evaluating every tool-call before execution and emitting an NDJSON audit trail; multi-model consensus + adversarial 'Red Cell' mode. This is the fail-closed gate Footed's verifier reuses. github.com/axiom-orion/governed-agents.",
   ),
   line(
     "cason-heritage",

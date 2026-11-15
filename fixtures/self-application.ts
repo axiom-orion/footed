@@ -42,13 +42,13 @@ const lines: LineVerdict[] = [
     "f3_paying",
     "3. Ship production code for an app with paying customers in your current role",
     "unverified",
-    "Not stamped green: there is no paying-customer product in current role to independently verify. Checkable adjacent facts exist — live deployments (governed-agents.vercel.app, footed-eight.vercel.app, flcason.com) and open-source repos (github.com/axiom-orion: agent-memory-service, genealogy-graphrag, governed-agents) — but the strict 'paying customers, current role' criterion is unmet. This is the tool refusing to bless what it can't prove, applied to its own author.",
+    "Not stamped green: there is no paying-customer product in current role to independently verify. Checkable adjacent facts exist — a live deployment (flcason.com), this tool itself, and open-source repos (github.com/axiom-orion: agent-memory-service, genealogy-graphrag, governed-agents) — but the strict 'paying customers, current role' criterion is unmet. This is the tool refusing to bless what it can't prove, applied to its own author.",
   ),
   line(
     "f4_nextjs",
     "4. Ship Next.js and care about UX",
     "verified",
-    "Reconciled to live, deployed Next.js apps: footed-eight.vercel.app (this tool), governed-agents.vercel.app (a Next.js policy-gate runtime), and flcason.com. UX here is tuned to the target product's calm, warm visual language.",
+    "Reconciled to live, deployed Next.js apps: this tool (the page you're reading) and flcason.com; the source of governed-agents, a Next.js policy-gate runtime, is at github.com/axiom-orion/governed-agents. UX here is tuned to the target product's calm, warm visual language.",
   ),
   line(
     "f5_legalai",

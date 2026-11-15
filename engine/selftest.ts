@@ -5,6 +5,8 @@
 import { verify } from "./verify.ts";
 import { florida } from "../jurisdictions/us-fl.ts";
 import { affidavit, sources } from "../fixtures/fl-sample.ts";
+import { selfApplication } from "../fixtures/self-application.ts";
+import { trackRecord } from "../fixtures/track-record.ts";
 
 const result = verify(affidavit, sources, florida);
 
@@ -39,6 +41,47 @@ expect("GREEN: known FL statute verified", byId.get("auth_support")?.verdict ===
 expect("GREEN: subtotal that foots is verified", byId.get("inc_total")?.verdict === "verified");
 expect("DOCUMENT: not cleared for filing", result.cleared === false);
 expect("DOCUMENT: exactly 3 refusals", result.counts.refused === 3);
+
+// --- evidence: receipts must not cite a retired host (the whole Vercel account is retired) ---
+const RETIRED_HOST = /\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.vercel\.app\b/i;
+const citesRetiredHost = (text: string) => RETIRED_HOST.test(text);
+
+// Every string anywhere in a value, with a label saying where it came from.
+const stringsIn = (value: unknown, where: string): Array<[string, string]> => {
+  if (typeof value === "string") return [[where, value]];
+  if (Array.isArray(value)) return value.flatMap((v, i) => stringsIn(v, `${where}[${i}]`));
+  if (value && typeof value === "object")
+    return Object.entries(value).flatMap(([k, v]) => stringsIn(v, `${where}.${k}`));
+  return [];
+};
+
+// Offending lineIds per receipt fixture (non-line strings are reported by their path).
+const retiredCitations = (name: string, value: unknown): string[] => {
+  const hits = new Set<string>();
+  for (const [where, text] of stringsIn(value, name)) {
+    if (!citesRetiredHost(text)) continue;
+    const lineId = /\.lines\[(\d+)\]/.exec(where);
+    const doc = value as { lines?: Array<{ lineId: string }> };
+    hits.add(lineId && doc.lines ? `${name}:${doc.lines[Number(lineId[1])].lineId}` : where);
+  }
+  return [...hits];
+};
+
+const retired = [
+  ...retiredCitations("fl-sample", result),
+  ...retiredCitations("fl-sample.affidavit", affidavit),
+  ...retiredCitations("fl-sample.sources", sources),
+  ...retiredCitations("self-application", selfApplication),
+  ...retiredCitations("track-record", trackRecord),
+];
+
+expect(
+  "EVIDENCE: planted retired-host citation is caught",
+  citesRetiredHost("Reconciled to live, deployed Next.js apps: footed-eight.vercel.app (this tool).") &&
+    !citesRetiredHost("Reconciled to live, deployed Next.js apps: flcason.com and github.com/axiom-orion/footed."),
+);
+expect("EVIDENCE: no receipt cites a retired host", retired.length === 0);
+if (retired.length > 0) console.log(`        retired-host citations: ${retired.join(", ")}`);
 
 console.log(
   process.exitCode === 1 ? "\n❌ self-test FAILED\n" : "\n✅ self-test passed — fail-closed behavior holds\n",

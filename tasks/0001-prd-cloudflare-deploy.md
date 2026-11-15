@@ -1,6 +1,6 @@
 # 0001 — Deploy on Cloudflare Workers
 
-**Status:** DRAFT
+**Status:** APPROVED (Ryan, 2026-11-15)
 
 ## Goal
 

@@ -98,6 +98,21 @@ The seeded Florida sample (`fixtures/fl-sample.ts`) carries three planted defect
 subtotal that doesn't foot, a retirement account asserted with no statement, and a
 Connecticut statute pasted into a Florida filing — and the receipt catches all three.
 
+## Deploy (Cloudflare Workers)
+
+The web app runs on Cloudflare Workers through the OpenNext adapter. The receipt still
+runs on every request (no caching or prerendering).
+
+```bash
+pnpm install
+pnpm cf:preview   # build the Worker and serve it locally in workerd
+pnpm cf:deploy    # build and deploy (run `pnpm exec wrangler login` first)
+```
+
+Or connect the repo in the Cloudflare dashboard with build command `pnpm cf:build` and
+deploy command `pnpm exec opennextjs-cloudflare deploy`. On Windows, use that route or
+WSL: OpenNext doesn't guarantee native Windows builds.
+
 ## Jurisdiction
 Ships with **Florida** — Form 12.902(c) (Long Form Financial Affidavit); child-support
 math derives from Fla. Stat. ch. 61. Every state-specific detail lives behind one
